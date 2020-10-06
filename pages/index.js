@@ -1,65 +1,145 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import { HeartTwoTone } from "@ant-design/icons";
+import { Button, Card } from "antd";
+import axios from "axios";
+import Head from "next/head";
+import NextLink from "next/link";
+import React, { useEffect, useReducer, useState } from "react";
 
+import Layout from "../src/components/Layout";
+import Search from "../src/components/Search";
+import { initialState, reducer } from "../store/reducer";
+
+import { useRecoilState } from "recoil";
+import { beerDataState } from "../store/atom";
+import { favBeers } from "../store/atom";
+
+// import spinner from "../assets/ajax-loader.gif";
 export default function Home() {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const [pageIndex, setPageIndex] = useState(1);
+  const [fav, setFav] = useRecoilState(favBeers);
+  const [beerData, setBeerData] = useRecoilState(beerDataState);
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+  const BEER_API_URL = `https://api.punkapi.com/v2/beers?page=${pageIndex}&per_page=10`;
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+  useEffect(() => {
+    axios.get(BEER_API_URL).then((jsonResponse) => {
+      console.log(jsonResponse.data);
+      // dispatch({
+      //   type: "SEARCH_BEER_SUCCESS",
+      //   payload: jsonResponse.data,
+      // });
+      setBeerData(jsonResponse);
+      // localStorage.setItem("fav", fav);
+    });
+  }, [BEER_API_URL]);
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+  const search = (searchValue) => {
+    // dispatch({
+    //   type: "SEARCH_BEER_REQUEST",
+    // });
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+    axios(`https://api.punkapi.com/v2/beers?beer_name=${searchValue}`).then(
+      (jsonResponse) => {
+        if (jsonResponse.data) {
+          // dispatch({
+          //   type: "SEARCH_BEER_SUCCESS",
+          //   payload: jsonResponse.data,
+          // });
+          setBeerData({ data: jsonResponse.data, loading: false });
+        } else {
+          // dispatch({
+          //   type: "SEARCH_BEER_FAILURE",
+          //   error: jsonResponse.data,
+          // });
+          setBeerData({ data: jsonResponse.data, loading: false });
+        }
+      }
+    );
+  };
 
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
+  // const setFavId = (id) => {
+  //   setFav((result) => [...result, id]);
+  //   console.log(fav);
+  // };
 
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
+  const favManagement = (id) => {
+    if (fav.includes(id)) {
+      setFav(fav.filter((e) => e !== id));
+      // localStorage.setItem("fav", fav);
+      console.log("fav beers", fav);
+    } else {
+      setFav((i) => [...i, id]);
+      // localStorage.setItem("fav", fav);
+      console.log("fav beers", fav);
+    }
+  };
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+  // const { beers, errorMessage, loading } = state;
+
+  const retrievedBeers = beerData.loading ? (
+    <p>Loading....</p>
+  ) : (
+    beerData.data.map((beer, index) => (
+      <Card
+        title={beer.name}
+        style={{ maxWidth: 200, width: 200, margin: 30 }}
+        key={beer.id}
+        cover={
+          <img
+            alt="example"
+            src={beer.image_url}
+            style={{
+              margin: "2rem 4rem",
+              width: "auto",
+              maxWidth: "200px",
+              justifyContent: "center",
+              display: "flex",
+              height: 200,
+              maxHeight: 200,
+            }}
+          />
+        }
+        extra={
+          <NextLink href="beer/[id]" as={`/beer/${beer.id}`}>
+            More
+          </NextLink>
+        }
+      >
+        {/* <div ke={beer.id}>
+                <Button type="primary">{beer.name}</Button>
+                <div><img src={beer.image_url} alt={beer.name} /> </div>*/}
+        {/* </div> */}
+        <Button
+          onClick={() => favManagement(beer.id)}
+          // className={fav.includes(beer.id) ? "enabled" : "disabled"}
         >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+          <HeartTwoTone
+            twoToneColor={fav.includes(beer.id) ? "#eb2f96" : "#000"}
+          />
+        </Button>
+      </Card>
+    ))
+  );
+
+  return (
+    <Layout>
+      <div className="App">
+        <Head>
+          <title>Beer</title>
+          <meta
+            name="viewport"
+            content="initial-scale=1.0, width=device-width"
+          />
+        </Head>
+        <div className="m-container">
+          <Search search={search} />
+
+          <div className="beer">{retrievedBeers}</div>
+          <button onClick={() => setPageIndex(pageIndex - 1)}>Previous</button>
+          <button onClick={() => setPageIndex(pageIndex + 1)}>Next</button>
+        </div>
+      </div>
+    </Layout>
+  );
 }

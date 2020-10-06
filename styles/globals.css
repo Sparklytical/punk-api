@@ -14,3 +14,31 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.beer {
+  display: flex;
+  justify-content: center;
+
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.beer-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.enabled {
+  background-color: aqua;
+}
+
+.disabled {
+  background-color: azure;
+}
+
+.search-comp {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
