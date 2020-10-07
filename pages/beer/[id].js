@@ -1,38 +1,90 @@
-import React, { useState, useEffect } from "react";
-import useSWR from "swr";
-import { useRouter } from "next/router";
+import { Descriptions, Image } from "antd";
+import axios from "axios";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
+import { useRecoilState } from "recoil";
+import styled from "styled-components";
+
 import Layout from "../../src/components/Layout";
-const Beer = ({ query }) => {
-  const BEER_API_URL = `https://api.punkapi.com/v2/beers`;
-  const [name, setName] = useState();
+import { beerDataState } from "../../store/atom";
+
+const BeerContainer = styled.div`
+  display: flex;
+  margin: 5rem;
+  height: 90vh;
+`;
+
+const layout = {
+  labelCol: { span: 8 },
+  wrapperCol: { span: 16 },
+};
+const tailLayout = {
+  wrapperCol: { offset: 8, span: 16 },
+};
+
+const Beer = () => {
   const router = useRouter();
   const { id } = router.query;
 
-  const fetcher = (...args) => fetch(...args).then((res) => res.json());
+  const [beerData, setBeerData] = useRecoilState(beerDataState);
 
-  const { data: result, error } = useSWR(`${BEER_API_URL}/${id}`, fetcher);
+  useEffect(() => {
+    if (beerData === null || beerData === undefined) {
+      const fetchBeers = async () => {
+        const res1 = await axios.get("https://api.punkapi.com/v2/beers");
+        setBeerData(res1.data);
+        console.log(beerData);
+      };
 
-  if (error) return <h1>Something went wrong!</h1>;
-  if (!result) return <h1>Loading...</h1>;
-  const res = result[0];
+      fetchBeers();
+    }
+  }, []);
 
-  // useEffect(() => setName(res.name), []);
-  // console.log("beer result", res);
-
-  // useEffect(() => {
-  //   axios.get(BEER_API_URL).then();
-  // });
+  var filterData = beerData.filter(function (obj) {
+    return obj.id === parseInt(id);
+  });
 
   return (
     <Layout>
-      <Head>
-        <title>{res.name}</title>
-        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
-      </Head>
-      <h3>{res.name}</h3>
-      <p>Beer: {id}</p>
-      <img src={res.image_url} alt={res.name} />
+      {filterData.map((i) => (
+        <BeerContainer>
+          <Head>
+            <title>{i.name}</title>
+            <meta
+              name="viewport"
+              content="initial-scale=1.0, width=device-width"
+            />
+          </Head>
+          <Descriptions
+            title="Beer Info"
+            bordered
+            column={{ xxl: 4, xl: 3, lg: 3, md: 3, sm: 2, xs: 1 }}
+          >
+            <Descriptions.Item label="Name" span={5}>
+              {i.name}
+            </Descriptions.Item>
+            <Descriptions.Item label="Image" span={2}>
+              <Image width={"auto"} height={300} src={i.image_url} />
+            </Descriptions.Item>
+            <Descriptions.Item label="Description">
+              {i.description}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tagline" span={2}>
+              {i.tagline}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tips" span={2}>
+              {i.brewers_tips}
+            </Descriptions.Item>
+            <Descriptions.Item label="Food Pairings" span={1}>
+              {i.food_pairing}
+            </Descriptions.Item>
+            <Descriptions.Item label="First Brewed" span={2}>
+              {i.first_brewed}
+            </Descriptions.Item>
+          </Descriptions>
+        </BeerContainer>
+      ))}
     </Layout>
   );
 };

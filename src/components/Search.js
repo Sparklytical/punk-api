@@ -36,11 +36,6 @@ const SearchComponent = ({ search }) => {
   return (
     <div className="search-comp">
       <form className="search">
-        {/* <input
-        value={searchValue}
-        onChange={handleSearchInputChanges}
-        type="text"
-      /> */}
         <Search
           placeholder="Input Beer Name"
           onSearch={callSearchFunction}
@@ -49,9 +44,8 @@ const SearchComponent = ({ search }) => {
           onChange={handleSearchInputChanges}
           value={searchValue}
         />
-        <Button onClick={handleClearSearch}>x</Button>
-        {/* <input onClick={callSearchFunction} type="submit" value="SEARCH" /> */}
       </form>
+      {searchValue && <Button onClick={handleClearSearch}>x</Button>}
     </div>
   );
 };

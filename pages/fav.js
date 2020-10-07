@@ -1,30 +1,34 @@
+import { HeartTwoTone } from "@ant-design/icons";
 import { Button, Card } from "antd";
-import axios from "axios";
 import NextLink from "next/link";
 import React, { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
-import { HeartTwoTone } from "@ant-design/icons";
+import styled from "styled-components";
 
 import Layout from "../src/components/Layout";
 import { beerDataState, favBeers } from "../store/atom";
 
-const Fav = () => {
-  // const [fav, setFav] = useRecoilState(favBeers);
+const VH = styled.div`
+  height: 90vh;
+  display: flex;
+  justify-content: center;
+`;
 
+const LH = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  height: 100vh;
+`;
+const Fav = () => {
   const [beerData, setBeerData] = useRecoilState(beerDataState);
   const [fav, setFav] = useRecoilState(favBeers);
   const [filteredData, setFilteredData] = useState([]);
 
   useEffect(() => {
-    // if (localStorage.getItem("fav")) {
-    //   setFav(localStorage.getItem("fav"));
-    // }
-    axios.get(`https://api.punkapi.com/v2/beers`).then((json) => {
-      const d = json.data;
-      let x = d.filter((elem) => fav.includes(elem.id));
-      setFilteredData(x);
-      console.log("filteredata", x);
-    });
+    const getFavs = beerData.filter((elem) => fav.includes(elem.id));
+    setFilteredData(getFavs);
+    console.log("filteredData", filteredData);
   }, [setFav, fav]);
 
   const favManagement = (id) => {
@@ -39,20 +43,18 @@ const Fav = () => {
     }
   };
 
-  if (fav === []) {
-    return (
-      <Layout>
-        <h1>No favs</h1>
-      </Layout>
-    );
-  }
   return (
     <Layout>
-      <div>
+      {fav.length === 0 && (
+        <VH>
+          <h2>{fav.length === 0 && "No Favourite Beers"}</h2>
+        </VH>
+      )}
+      <LH>
         {filteredData.map((beer) => (
           <Card
             title={beer.name}
-            style={{ maxWidth: 200, width: 200, margin: 30 }}
+            style={{ maxWidth: 200, width: 200, margin: 30, height: 400 }}
             key={beer.id}
             cover={
               <img
@@ -75,34 +77,16 @@ const Fav = () => {
               </NextLink>
             }
           >
-            <Button
-              onClick={() => favManagement(beer.id)}
-              // className={fav.includes(beer.id) ? "enabled" : "disabled"}
-            >
+            <Button onClick={() => favManagement(beer.id)}>
               <HeartTwoTone
                 twoToneColor={fav.includes(beer.id) ? "#eb2f96" : "#000"}
               />
             </Button>
           </Card>
         ))}
-      </div>
+      </LH>
     </Layout>
   );
 };
-
-// export async function getServerSideProps() {
-//   const BEER_API_URL = `https://api.punkapi.com/v2/beers`;
-//   // axios.get(BEER_API_URL).then((jsonResponse) => {
-//   //   setBeerData(jsonResponse);
-//   // });
-//   const res = await fetch(`https://api.punkapi.com/v2/beers`);
-//   const data = await res.json();
-
-//   return {
-//     props: {
-//       data,
-//     },
-//   };
-// }
 
 export default Fav;

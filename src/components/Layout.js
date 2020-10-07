@@ -1,13 +1,13 @@
 import React from "react";
 import Header from "./Header";
-import { Layout as antLayout } from "antd";
+import { Layout as AntLayout } from "antd";
 
 const Layout = ({ children }) => {
   return (
-    <antLayout>
-      <Header text="Beer" />
+    <AntLayout>
+      <Header text="Beers from API" />
       <div>{children}</div>
-    </antLayout>
+    </AntLayout>
   );
 };
 
