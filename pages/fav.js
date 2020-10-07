@@ -25,7 +25,7 @@ const Fav = () => {
       setFilteredData(x);
       console.log("filteredata", x);
     });
-  }, [setFav]);
+  }, [setFav, fav]);
 
   const favManagement = (id) => {
     if (fav.includes(id)) {

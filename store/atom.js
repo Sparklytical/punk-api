@@ -2,10 +2,7 @@ import { atom } from "recoil";
 
 export const beerDataState = atom({
   key: "beer",
-  default: {
-    data: null,
-    loading: true,
-  },
+  default: [],
 });
 
 export const favBeers = atom({

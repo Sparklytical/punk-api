@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import { Input } from "antd";
 const { Search } = Input;
+import axios from "axios";
+import { Button } from "antd";
+import { useRecoilState } from "recoil";
+import { beerDataState } from "../../store/atom";
 
 const SearchComponent = ({ search }) => {
   const [searchValue, setSearchValue] = useState("");
+  const [beerData, setBeerData] = useRecoilState(beerDataState);
 
   const handleSearchInputChanges = (e) => {
     setSearchValue(e.target.value);
@@ -16,7 +21,16 @@ const SearchComponent = ({ search }) => {
   const callSearchFunction = (e) => {
     // e.preventDefault();
     search(searchValue);
-    resetInputField();
+  };
+
+  const handleClearSearch = () => {
+    const fetchBeers = async () => {
+      const res1 = await axios.get("https://api.punkapi.com/v2/beers");
+
+      setBeerData(res1.data);
+    };
+
+    fetchBeers();
   };
 
   return (
@@ -35,6 +49,7 @@ const SearchComponent = ({ search }) => {
           onChange={handleSearchInputChanges}
           value={searchValue}
         />
+        <Button onClick={handleClearSearch}>x</Button>
         {/* <input onClick={callSearchFunction} type="submit" value="SEARCH" /> */}
       </form>
     </div>
