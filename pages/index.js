@@ -13,8 +13,13 @@ import { initialState, reducer } from "../store/reducer";
 import { useRecoilState } from "recoil";
 import { beerDataState } from "../store/atom";
 import { favBeers } from "../store/atom";
-
+import styled from "styled-components";
 // import spinner from "../assets/ajax-loader.gif";
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: space-around;
+`;
 export default function Home({ item }) {
   const [fav, setFav] = useRecoilState(favBeers);
   const [beerData, setBeerData] = useRecoilState(beerDataState);
@@ -95,12 +100,14 @@ export default function Home({ item }) {
         </NextLink>
       }
     >
-      <Button onClick={() => deleteItem(beer.id)}>X</Button>
-      <Button onClick={() => favManagement(beer.id)}>
-        <HeartTwoTone
-          twoToneColor={fav.includes(beer.id) ? "#eb2f96" : "#000"}
-        />
-      </Button>
+      <ButtonContainer>
+        <Button onClick={() => deleteItem(beer.id)}>X</Button>
+        <Button onClick={() => favManagement(beer.id)}>
+          <HeartTwoTone
+            twoToneColor={fav.includes(beer.id) ? "#eb2f96" : "#000"}
+          />
+        </Button>
+      </ButtonContainer>
     </Card>
   ));
   // Change page
